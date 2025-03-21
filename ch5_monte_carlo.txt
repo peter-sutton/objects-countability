@@ -1,0 +1,25 @@
+from scipy.spatial import distance
+
+dst = distance.cosine(pred_vec, obs_vec)
+
+# where pred_vec, obs_vec are list for the predicted and observed vectors.
+n = 5000000
+m = 300
+cos_results = []
+cos_mus = []
+cos_runtimes = []
+# b is a list, the predicted or measured vector that will be randomly shuffled
+b = []
+
+#Outer loop
+for its in range(0,m):
+    l = []
+    # Inner loop
+    for x in range(0,n):
+        random.shuffle(b)
+        dst_comp = distance.cosine(pred_vec,b)
+        if dst_comp <= dst:
+            l.append(dst_comp)     
+    cos_prob = len(l)/n
+    cos_results.append(l)
+    cos_mus.append(cos_prob)
