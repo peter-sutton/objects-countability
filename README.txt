@@ -4,7 +4,8 @@
 
 - ch2_czech_res_table.csv
 - ch2_eng_res_table.csv
-- ch2_noun_freq.csv
+- ch2_czech_noun_freq.csv
+- ch2_english_noun_freq.csv
 
 ## Files from the corpus study in chapter 2:
 
