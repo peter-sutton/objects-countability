@@ -8,5 +8,5 @@ Files from the corpus study in chapter 2:
 
 Files from the corpus study in chapter 2:
 
-- czech_res_table.csv
-- eng_res_table.csv
+- c1_res.csv
+- c3_res.csv
