@@ -1,0 +1,116 @@
+import spacy
+nlp = spacy.load("en_core_web_trf")
+from spacy import displacy
+from spacy.matcher import Matcher
+
+
+
+def parse_list_func(nlp_obj):
+    parse_list = []
+    for token in nlp_obj:
+        token_text = token.text
+        token_lemma = token.lemma_
+        token_pos = token.pos_
+        token_dep = token.dep_
+        token_head = token.head.lemma_
+        token_head_index = token.head.i
+        token_index = token.i
+        parse_list.append([token_text, token_lemma, token_pos, token_head,token_dep, token_head_index,token_index])
+    return parse_list
+    
+
+
+def find_mod(nlp_obj):
+    parse_list = parse_list_func(nlp_obj)
+    matches_str = matcher(nlp_obj)
+
+    noun_pos_dict = {}
+    for ent in noun_list:
+        noun_pos_dict[ent] = []
+
+    noun_mods_dict = {}
+    for ent in noun_list:
+        noun_mods_dict[ent] = []
+
+
+    mods_pos_dict = {}
+    for item in mod_list:
+        mods_pos_dict[item] = []
+       
+
+    for tup in matches_str:
+        for ent in noun_list:
+            if nlp_obj.vocab.strings[tup[0]] == ent:
+                noun_pos_dict[ent].append(tup[1])
+
+    for tup in matches_str:
+        for ent in mod_list:
+            if nlp_obj.vocab.strings[tup[0]] == ent:
+                mods_pos_dict[ent].append(tup[1])
+                
+    #Adj mod: If mod lemma is in parse, has amod dependency and the head number index is for a noun in the noun list
+    for item in parse_list:
+        if item[1] in mod_list and item[-4] in noun_list and item[-3] == 'amod':
+            mod_pos = item[-1]
+            noun = item[-4]
+            noun_mods_dict[noun].append(nlp_obj[mod_pos].lemma_)
+#             print("Adj mod")    
+    
+    #PP mod: If Subj NP dpends on a modifier in the PP:
+    for item in parse_list:
+        if item[1] in mod_list and item[-3] == 'pobj':
+            mod_pos = item[-1]
+            mod_head_pos = item[-2]
+            head_mod_head_pos = parse_list[mod_head_pos][-2]
+            for item2 in parse_list:
+                if item2[1] in noun_list and item2[-2] == head_mod_head_pos:
+                    mod_pos = item[-1]
+                    noun_lab = item2[1]
+                    noun_mods_dict[noun_lab].append(nlp_obj[mod_pos].lemma_)
+#                     print("PP mod")
+            # And if N is in a PP (e.g. mound of sand)        
+            for item4 in parse_list:
+                for item3 in parse_list: 
+                    if item4[1] in mod_list and item4[-2] == head_mod_head_pos and item3[1] in noun_list and item3[-3] == 'pobj':
+                        sub_mod_pos = item4[-1]
+                        noun_head_pos = item3[-2]
+                        head_noun_head_pos = parse_list[noun_head_pos][-2]
+                        if head_noun_head_pos == sub_mod_pos:
+                            noun_lab = item3[1]
+                            noun_mods_dict[noun_lab].append(nlp_obj[mod_pos].lemma_)
+#                             print("PP mod from PP head")
+
+    #PP N with mod as head e.g. mound of sand:
+    for item in parse_list:
+        if item[1] in noun_list and item[-3] == 'pobj':
+            prep_pos = item[-2]
+            head_pos = parse_list[prep_pos][-2]
+            for ent1 in mods_pos_dict:
+                for m in mods_pos_dict[ent1]:
+                    if head_pos == m:
+                        noun_mods_dict[item[1]].append(nlp_obj[m].lemma_)                    
+#                         print("PP with mod head")
+
+
+    #V mod: If NP dpends on mod (e.g. sand piled up):
+    for item in parse_list:
+        for ent1 in mods_pos_dict:
+            for m in mods_pos_dict[ent1]:
+                if item[1] in noun_list and item[-2] == m:
+                    noun_dep_pos = m
+                    noun_mods_dict[item[1]].append(nlp_obj[m].lemma_)
+#                     print("V mod")
+                # V mod if the N is headed by a mod PP (e.g. mound of sand piled up)    
+                if item[1] in mod_list and item[-2] == m and item[-3] != "ROOT":
+                    head_dep_pos = m
+                    head_pos = item[-1]
+                    for item2 in parse_list:
+                        if item2[-3] == "pobj":
+                            noun_head_pos = item2[-2]
+                            head_noun_head_pos = parse_list[noun_head_pos][-2]
+                            if head_noun_head_pos == head_pos and item2[1] in noun_mods_dict:
+                                noun_mods_dict[item2[1]].append(nlp_obj[m].lemma_)
+#                                 print('V mod of PP with Mod head')
+        
+                    
+    return noun_mods_dict
