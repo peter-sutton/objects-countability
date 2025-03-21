@@ -1,5 +1,11 @@
 # Readme objects-countability
 
+This is a repository for data and code related to two corpus studies conducted as 
+part chapters 2 and 5 of the volume "Objects and the Grammar of Countability" (P. Sutton and H. Filip).
+
+Files are prefixed either ch2 or ch5.
+
+
 ## Files from the corpus study in chapter 2:
 
 Results:
