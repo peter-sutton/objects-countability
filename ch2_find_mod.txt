@@ -1,0 +1,57 @@
+import spacy
+nlp = spacy.load("en_core_web_trf")
+from spacy import displacy
+from spacy.matcher import Matcher
+
+
+
+def parse_list_func(nlp_obj):
+    parse_list = []
+    for token in nlp_obj:
+        token_text = token.text
+        token_lemma = token.lemma_
+        token_pos = token.pos_
+        token_dep = token.dep_
+        token_head = token.head.lemma_
+        token_head_index = token.head.i
+        token_index = token.i
+        parse_list.append([token_text, token_lemma, token_pos, token_head,token_dep, token_head_index,token_index])
+    return parse_list
+    
+    
+    
+def find_mod(nlp_obj):
+    parse_list = parse_list_func(nlp_obj)
+    matches_str = matcher(nlp_obj)
+
+    noun_pos_dict = {}
+    for ent in noun_list:
+        noun_pos_dict[ent] = []
+
+    noun_mods_dict = {}
+    for ent in noun_list:
+        noun_mods_dict[ent] = []
+
+
+    mods_pos_dict = {}
+    for item in mod_list:
+        mods_pos_dict[item] = []
+       
+
+    for tup in matches_str:
+        for ent in noun_list:
+            if nlp_obj.vocab.strings[tup[0]] == ent:
+                noun_pos_dict[ent].append(tup[1])
+
+    for tup in matches_str:
+        for ent in mod_list:
+            if nlp_obj.vocab.strings[tup[0]] == ent:
+                mods_pos_dict[ent].append(tup[1])
+                
+    #Adj mod: If mod lemma is in parse, has amod dependency and the head number index is for a noun in the noun list
+    for item in parse_list:
+        if item[1] in mod_list and item[-4] in noun_list and item[-3] == 'amod':
+            mod_pos = item[-1]
+            noun = item[-4]
+            noun_mods_dict[noun].append(nlp_obj[mod_pos].lemma_)
+    return noun_mods_dict
