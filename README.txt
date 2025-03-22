@@ -29,3 +29,4 @@ Results:
 Code
 - ch5_find_mod_def.txt
 - ch5_monte_carlo.txt
+- weighted_model.py  (Weighted scoring model, executable script)
