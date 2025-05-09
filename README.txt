@@ -19,7 +19,7 @@ Code:
 
 
 
-## Files from the corpus study in chapter 2:
+## Files from the corpus study in chapter 5:
 
 Results:
 - ch5_c1_res.csv
